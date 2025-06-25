@@ -5,7 +5,9 @@ import dbClient from './db';
 import userUtils from './user';
 import basicUtils from './basic';
 
+// File utilities module
 const fileUtils = {
+  // Validate request body for file creation
   async validateBody(request) {
     const {
       name, type, isPublic = false, data,
@@ -56,16 +58,19 @@ const fileUtils = {
     return obj;
   },
 
+  // Get file document from db
   async getFile(query) {
     const file = await dbClient.filesCollection.findOne(query);
     return file;
   },
 
+  // Get list of files by parent id
   async getFilesOfParentId(query) {
     const fileList = await dbClient.filesCollection.aggregate(query);
     return fileList;
   },
 
+  // Save file to db and disk
   async saveFile(userId, fileParams, FOLDER_PATH) {
     const {
       name, type, isPublic, data,
@@ -102,6 +107,9 @@ const fileUtils = {
 
     const result = await dbClient.filesCollection.insertOne(query);
 
+    // query.userId = query.userId.toString();
+    // query.parentId = query.parentId.toString();
+
     const file = this.processFile(query);
 
     const newFile = { id: result.insertedId, ...file };
@@ -109,6 +117,7 @@ const fileUtils = {
     return { error: null, newFile };
   },
 
+  // Update file document in db
   async updateFile(query, set) {
     const fileList = await dbClient.filesCollection.findOneAndUpdate(
       query,
@@ -118,6 +127,7 @@ const fileUtils = {
     return fileList;
   },
 
+  // Make file public or private
   async publishUnpublish(request, setPublish) {
     const { id: fileId } = request.params;
 
@@ -169,8 +179,10 @@ const fileUtils = {
     return { error: null, code: 200, updatedFile };
   },
 
-
+  // Transform _id to id in file doc
   processFile(doc) {
+    // Changes _id for id and removes localPath
+
     const file = { id: doc._id, ...doc };
 
     delete file.localPath;
@@ -179,6 +191,7 @@ const fileUtils = {
     return file;
   },
 
+  // Check if file is public and belongs to user
   isOwnerAndPublic(file, userId) {
     if (
       (!file.isPublic && !userId)
@@ -188,6 +201,7 @@ const fileUtils = {
     return true;
   },
 
+  // Get file data from db
   async getFileData(file, size) {
     let { localPath } = file;
     let data;

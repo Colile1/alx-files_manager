@@ -1,7 +1,7 @@
 import redis from 'redis';
 import { promisify } from 'util';
 
-
+// Redis service operations class
 class RedisClient {
   constructor() {
     this.client = redis.createClient();
@@ -16,19 +16,23 @@ class RedisClient {
     });
   }
 
+  // Check if Redis connection is alive
   isAlive() {
     return this.client.connected;
   }
 
+  // Get value for key in redis
   async get(key) {
     const value = await this.getAsync(key);
     return value;
   }
 
+  // Set key in redis with TTL
   async set(key, value, duration) {
     this.client.setex(key, duration, value);
   }
 
+  // Delete key in redis
   async del(key) {
     this.client.del(key);
   }

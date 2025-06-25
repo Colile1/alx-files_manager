@@ -6,10 +6,10 @@ import fileUtils from '../utils/file';
 import basicUtils from '../utils/basic';
 
 const FOLDER_PATH = process.env.FOLDER_PATH || '/tmp/files_manager';
-
 const fileQueue = new Queue('fileQueue');
 
 class FilesController {
+  // Create a new file in DB and disk
   static async postUpload(request, response) {
     const { userId } = await userUtils.getUserIdAndKey(request);
 
@@ -55,7 +55,7 @@ class FilesController {
     return response.status(201).send(newFile);
   }
 
-
+  // Retrieve file document by ID
   static async getShow(request, response) {
     const fileId = request.params.id;
 
@@ -82,6 +82,7 @@ class FilesController {
     return response.status(200).send(file);
   }
 
+  // Retrieve all user file docs for parentId with pagination
   static async getIndex(request, response) {
     const { userId } = await userUtils.getUserIdAndKey(request);
 
@@ -130,6 +131,7 @@ class FilesController {
     return response.status(200).send(fileList);
   }
 
+  // Set isPublic to true for file by ID
   static async putPublish(request, response) {
     const { error, code, updatedFile } = await fileUtils.publishUnpublish(
       request,
@@ -141,6 +143,7 @@ class FilesController {
     return response.status(code).send(updatedFile);
   }
 
+  // Set isPublic to false for file by ID
   static async putUnpublish(request, response) {
     const { error, code, updatedFile } = await fileUtils.publishUnpublish(
       request,
@@ -152,12 +155,13 @@ class FilesController {
     return response.status(code).send(updatedFile);
   }
 
+  // Return file content by ID
   static async getFile(request, response) {
     const { userId } = await userUtils.getUserIdAndKey(request);
     const { id: fileId } = request.params;
     const size = request.query.size || 0;
 
-
+    // Mongo Condition for Id
     if (!basicUtils.isValidId(fileId)) { return response.status(404).send({ error: 'Not found' }); }
 
     const file = await fileUtils.getFile({
@@ -177,9 +181,7 @@ class FilesController {
     if (error) return response.status(code).send({ error });
 
     const mimeType = mime.contentType(file.name);
-
     response.setHeader('Content-Type', mimeType);
-
     return response.status(200).send(data);
   }
 }
